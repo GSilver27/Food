@@ -259,9 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 object[key] = value;
             });
 
-            const json = 
-
-            fetch('server1.php', {
+            fetch('server.php', {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'
