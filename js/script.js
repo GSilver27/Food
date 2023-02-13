@@ -107,7 +107,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // МОДАЛЬНОЕ ОКНО
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-          modal = document.querySelector('.modal');
+          modal = document.querySelector('.modal'),
+          modalCloseBtn = document.querySelector('[data-close]');
 
     function openModal() {
         modal.classList.add('show');
@@ -126,6 +127,9 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
+    // добавлено 13.02, проморгал этот момент
+    modalCloseBtn.addEventListener('click', closeModal);
+
     modal.addEventListener('click', (event) => {
         if (event.target === modal || event.target.getAttribute('data-close' == '')) {
             closeModal();
@@ -140,11 +144,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // в некоторых случаях может баговать при достижении конца страницы
-    // фикс проблемы — это -1 в конце условия
-
     const modalTimerId = setTimeout(openModal, 60000);
 
+    // в некоторых случаях может баговать при достижении конца страницы
+    // фикс проблемы — это -1 в конце условия
     function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
             openModal();
@@ -248,10 +251,6 @@ window.addEventListener('DOMContentLoaded', () => {
             statusMessage.classList.add('loader');
             form.insertAdjacentElement('afterend', statusMessage);
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             const formData = new FormData(form);
 
             // делаем копию, которую затем отправим уже в JSON'e
@@ -260,19 +259,24 @@ window.addEventListener('DOMContentLoaded', () => {
                 object[key] = value;
             });
 
-            const json = JSON.stringify(object);
+            const json = 
 
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(message.succes);
-                    form.reset();
-                    statusMessage.remove();
-                } else {
-                    showThanksModal(message.failure);
-                }
+            fetch('server1.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            })
+            .then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.succes);
+                statusMessage.remove();
+            }).catch(() => {
+                showThanksModal(message.failure);
+            }).finally(() => {
+                form.reset();
             });
         });
     }
